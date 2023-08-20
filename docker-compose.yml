@@ -5,14 +5,16 @@ services:
     container_name: funbase
     build: .
     depends_on:
-      - db
-    command: uvicorn app.main:app --reload
+      - db    
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload 
     ports:
-      - "8000:8000"
+      - 8080:8080
+    volumes:
+      - .:/app
 
   db:
-    container_name: funbase_db
     image: postgres
+    container_name: funbase_db
     restart: always
     ports:
       - "5432:5432"
@@ -23,14 +25,15 @@ services:
       - postgres:/var/lib/postgresql/data
 
   pgAdmin:
+    image: dpage/pgadmin4
     container_name: funbase_admin
-    image: pgAdmin
     depends_on:
       - db
     ports:
       - "5050:80"
     environment:
-      - name=value
+      PGADMIN_DEFAULT_EMAIL: root@example.com
+      PGADMIN_DEFAULT_PASSWORD: root
     volumes:
       - pgAdmin:/var/lib/pgadmin
       
