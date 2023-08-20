@@ -1,0 +1,39 @@
+version: '3.9'
+
+services:
+  app:
+    container_name: funbase
+    build: .
+    depends_on:
+      - db
+    command: uvicorn app.main:app --reload
+    ports:
+      - "8000:8000"
+
+  db:
+    container_name: funbase_db
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+  pgAdmin:
+    container_name: funbase_admin
+    image: pgAdmin
+    depends_on:
+      - db
+    ports:
+      - "5050:80"
+    environment:
+      - name=value
+    volumes:
+      - pgAdmin:/var/lib/pgadmin
+      
+volumes:
+  postgres:
+  pgAdmin:
