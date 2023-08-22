@@ -10,16 +10,19 @@ generator client {
 
 // User model
 model User {
-    id            String   @id @default(uuid())
+    id            String             @id @default(uuid())
     username      String
-    email         String   @unique
-    emailVerified Boolean  @default(false)
+    email         String             @unique
+    emailVerified Boolean            @default(false)
     password      String
     profile       Profile?
-    follower      Follow[] @relation("follower")
-    following     Follow[] @relation("following")
-    createdAt     DateTime @default(now())
-    updatedAt     DateTime @updatedAt
+    follower      Follow[]           @relation("follower")
+    following     Follow[]           @relation("following")
+    account       StripeAccount?
+    plan          SubscriptionPlan[]
+    createdAt     DateTime           @default(now())
+    updatedAt     DateTime           @updatedAt
+    Subscription  Subscription?
 }
 
 // Profile model
@@ -39,4 +42,39 @@ model Follow {
     followerId  String @unique
     following   User   @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
     followingId String @unique
+}
+
+// Subscription Plan model
+model SubscriptionPlan {
+    id          String         @id @default(uuid())
+    name        String
+    price       Float
+    planImage   String?
+    description String?
+    // Store post ids in different database
+    postId      String[]
+    author      User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+    authorId    String         @unique
+    subscribers Subscription[]
+}
+
+// Subscription model
+model Subscription {
+    id           String           @id @default(uuid())
+    subscriber   User             @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+    subscriberId String           @unique
+    plan         SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+    planId       String           @unique
+    active       Boolean          @default(false)
+    updatedAt    DateTime         @updatedAt
+}
+
+// Stripe Account model
+model StripeAccount {
+    id              String  @id @default(uuid())
+    stripeAccountId String
+    chargesEnabled  Boolean @default(false)
+    transferEnabled Boolean @default(false)
+    user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId          String  @unique
 }
