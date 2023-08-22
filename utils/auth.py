@@ -4,17 +4,17 @@ import os
 from dotenv import load_dotenv
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
-from ..schemas import user
 
+env_path = os.path.join(os.path.dirname(__file__), '../.env')
 # Load the environment variables
-load_dotenv()
+load_dotenv(env_path)
 
 oauth2_schema = OAuth2PasswordBearer(
     tokenUrl='login'
 )
 
 # JWT encode configs
-SECRET_KEY= os.environ(['7d870b39ee7472151e409f7642c52ccd27edb488cdce95fa6b4dbc8391c3f77b'])
+SECRET_KEY= os.getenv("AUTH_SECRET")
 ALGORITHM="HS256"
 ACCESS_TOKEN_EXPIRE = 7
 
