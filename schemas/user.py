@@ -1,14 +1,27 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
+from prisma.models import User
 
-class UserCreate(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
+# user response schema
+User.create_partial('UserOut', exclude_relational_fields=True, exclude={{ 'password', 'emailVerified' }})
 
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
+# get a user response schema
+User.create_partial('UserGet', exclude={{ 'password' }})
 
+# user login schema
+User.create_partial('UserLogin', include={{ 'email', 'password' }})
+
+# user create schema
+User.create_partial('UserCreate', include={{ 'username', 'email', 'password' }})
+
+# reset password schema
+User.create_partial('ResetPassword', include={{ 'email', 'password' }})
+
+# schema for input data when getting users
+class GetUsers(BaseModel):
+    take: int
+    orderBy: str
+
+# schema for a user when logged in
 class Token(BaseModel):
     access_token: str
     token_type: str
