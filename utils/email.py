@@ -15,7 +15,9 @@ configs = ConnectionConfig(
     MAIL_PORT=os.getenv('MAIL_PORT'),
     MAIL_SERVER=os.getenv('MAIL_SERVER'),
     MAIL_FROM_NAME=os.getenv('MAIL_FROM_NAME'),
-    TEMPLATE_FOLDER='./templates/email'
+    MAIL_STARTTLS=True,
+    MAIL_SSL_TLS=False,
+    TEMPLATE_FOLDER='./templates/'
 )
 
 """
