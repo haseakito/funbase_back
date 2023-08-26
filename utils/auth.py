@@ -29,7 +29,7 @@ def create_access_token(data: dict):
     to_encode.update({"exp": expire})
 
     # Encode the token
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=[ALGORITHM])
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
     return encoded_jwt
 
@@ -39,7 +39,7 @@ Function handling verifying the token
 def verify_access_token(token: str, credential_exception):
     try:
         # Decode the token 
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
         user_id: str = payload.get("user_id")
 
         if user_id is None:
