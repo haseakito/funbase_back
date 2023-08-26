@@ -1,5 +1,5 @@
-from fastapi_mail import FastMail, ConnectionConfig, MessageSchema
-from pydantic import EmailStr
+from fastapi_mail import FastMail, ConnectionConfig, MessageSchema, MessageType
+from schemas.user import EmailSchema
 import os
 from dotenv import load_dotenv
 
@@ -23,14 +23,14 @@ configs = ConnectionConfig(
 """
 Asynchronous function handling sending email
 """
-async def send_email(email_to: EmailStr, body: dict):
+async def send_email(data: EmailSchema):
 
     # message schema
     message = MessageSchema(
         subject='Funbase',
-        recipients=[email_to],
-        body=body,
-        subtype='html'
+        recipients=data.dict().get('email'),
+        template_body=data.dict().get('body'),
+        subtype=MessageType.html
     )
 
     fm = FastMail(configs)
