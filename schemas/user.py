@@ -1,14 +1,11 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
-class UserCreate(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
+# schema for input data when getting users
+class GetUsers(BaseModel):
+    take: int
+    orderBy: str
 
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
-
+# schema for a user when logged in
 class Token(BaseModel):
     access_token: str
     token_type: str
