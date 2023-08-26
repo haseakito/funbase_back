@@ -23,7 +23,10 @@ router = APIRouter(
 )
 
 @router.post('/account', status_code=status.HTTP_201_CREATED)
-async def create_account(country: str, db: Prisma = Depends(db.get_db), user_id: str = Depends(auth.get_current_user)):
+async def create_account(country: str, user_id: str = Depends(auth.get_current_user)):
+    # Connect to database
+    prisma = Prisma()
+    await prisma.connect()
 
     # Call the Stripe API to create a connected account of type express
     account = stripe.Account.create(
@@ -46,34 +49,24 @@ async def create_account(country: str, db: Prisma = Depends(db.get_db), user_id:
     )
 
     # Store the account Id in the database
-    await db.stripeaccount.create(
+    await prisma.stripeaccount.create(
         data={
             'stripeAccountId': account.stripe_id,
             'userId': user_id,
         }
     )
-
-@router.post('/account_session', status_code=status.HTTP_200_OK)
-async def create_account_session():
-    try:
-        account_session = stripe.AccountSession.create(
-            account=os.getenv("STRIPE_CONNECTED_ID")
-        )
-
-        return {'client_secret': account_session.client_secret }
-    
-    except Exception as e:
-        print('An error occurred when calling the Stripe API to create an account session: ', e)
-        return e
     
 """
 Function handling subscribing to a plan
 """
 @router.post('/{plan_id}', status_code=status.HTTP_200_OK)
-async def create_checkout_session(plan_id: str, db: Prisma = Depends(db.get_db), user_id: str = Depends(auth.get_current_user)):
+async def create_checkout_session(plan_id: str, user_id: str = Depends(auth.get_current_user)):
+    # Connect to database
+    prisma = Prisma()
+    await prisma.connect()
 
     # Query the subscription plan with plan_id
-    plan = await db.subscriptionplan.find_unique(
+    plan = await prisma.subscriptionplan.find_unique(
         where={
             'id': plan_id
         }
@@ -109,7 +102,7 @@ async def create_checkout_session(plan_id: str, db: Prisma = Depends(db.get_db),
     )
 
     # Create the subscription
-    await db.subscription.create(
+    await prisma.subscription.create(
         data={
             'subscriberId': user_id,
             'planId': plan_id,

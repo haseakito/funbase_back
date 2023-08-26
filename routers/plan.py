@@ -1,6 +1,5 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 from prisma import Prisma
-from models import db
 from schemas import subscription
 from utils import auth
 
@@ -12,14 +11,17 @@ router = APIRouter(
     tags=['Plan']
 )
 
+"""
+Function handling creating the subscription plan
+"""
 @router.post('/', status_code=status.HTTP_201_CREATED)
-async def create_plan(
-    data: subscription.SubscriptionCreate,
-    db: Prisma = Depends(db.get_db),
-    user_id: str = Depends(auth.get_current_user)):
+async def create_plan(data: subscription.SubscriptionCreate, user_id: str = Depends(auth.get_current_user)):
+    # Connect to database
+    prisma = Prisma()
+    await prisma.connect()
 
     # Create the subscription plan
-    await db.subscriptionplan.create(
+    await prisma.subscriptionplan.create(
         data={
             'authorId': user_id,
             'name': data.name,
@@ -31,9 +33,13 @@ async def create_plan(
 Function handling getting the plans that the user has
 """
 @router.get('/{user_id}', status_code=status.HTTP_200_OK, response_model=subscription.SubscriptionOut)
-async def get_plans(user_id: str, db: Prisma = Depends(db.get_db)):
+async def get_plans(user_id: str):
+    # Connect to database
+    prisma = Prisma()
+    await prisma.connect()
+
     # Query the subscription plans for a user
-    user = await db.user.find_unique(
+    user = await prisma.user.find_unique(
         where={
             'id': user_id
         }
@@ -45,14 +51,17 @@ async def get_plans(user_id: str, db: Prisma = Depends(db.get_db)):
     
     return user.plan
 
+"""
+Function handling updating the subscription plan
+"""
 @router.put('/{plan_id}', status_code=status.HTTP_200_OK)
-async def update_plan(
-    plan_id: str,
-    data: subscription.SubscriptionUpdate,
-    db: Prisma = Depends(db.get_db),
-    user_id: str = Depends(auth.get_current_user)):
+async def update_plan(plan_id: str, data: subscription.SubscriptionUpdate, user_id: str = Depends(auth.get_current_user)):
+    # Connect to database
+    prisma = Prisma()
+    await prisma.connect()
+
     # Query the subscription plan
-    plan = await db.subscriptionplan.find_unique(
+    plan = await prisma.subscriptionplan.find_unique(
         where={
             'id': plan_id
         }
@@ -66,7 +75,7 @@ async def update_plan(
         )
     
     # Update the subscription plan
-    result = await db.subscriptionplan.update(
+    result = await prisma.subscriptionplan.update(
         where={
             'id': plan_id
         },
@@ -76,10 +85,17 @@ async def update_plan(
         }
     )
 
+"""
+Function handling deleting the subscription plan
+"""
 @router.delete('/{plan_id}', status_code=status.HTTP_200_OK)
-async def delete_plan(plan_id: str, db: Prisma = Depends(db.get_db), user_id: str = Depends(auth.get_current_user)):
+async def delete_plan(plan_id: str, user_id: str = Depends(auth.get_current_user)):
+    # Connect to database
+    prisma = Prisma()
+    await prisma.connect()
+
     # Query the subscription plan
-    plan = await db.subscriptionplan.find_unique(
+    plan = await prisma.subscriptionplan.find_unique(
         where={
             'id': plan_id
         }
@@ -93,7 +109,7 @@ async def delete_plan(plan_id: str, db: Prisma = Depends(db.get_db), user_id: st
         )
     
     # Delete the subscription plan
-    await db.subscriptionplan.delete(
+    await prisma.subscriptionplan.delete(
         where={
             'id': plan_id
         }

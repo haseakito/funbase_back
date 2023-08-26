@@ -1,8 +1,7 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from prisma import Prisma
-from models import db
-from schemas import user
+from schemas.user import Token
 from utils import hash, auth
 
 """
@@ -15,10 +14,14 @@ router = APIRouter(
 """
 Function handling logging the user
 """
-@router.post('/login', status_code=status.HTTP_200_OK, response_model=user.Token)
-async def login(user_cred: OAuth2PasswordRequestForm = Depends(), db: Prisma = Depends(db.get_db)):
-    # Query the user with email
-    user = await db.user.find_unique(
+@router.post('/login', status_code=status.HTTP_200_OK, response_model=Token)
+async def login(user_cred: OAuth2PasswordRequestForm = Depends()):
+    # Connect to database
+    prisma = Prisma()
+    await prisma.connect()
+
+    # Query the user with email (note that username defined here is email)
+    user = await prisma.user.find_unique(
         where={
             'email': user_cred.username
         }
