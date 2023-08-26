@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status, HTTPException, Response, Depends
 from prisma import Prisma
-from prisma.partials import UserGet, UserOut, UserCreate
+from prisma.partials import UserOut, UserGet, UserCreate, ResetPassword
 from models import db
 from utils import hash, auth, email
 from schemas import user
@@ -29,6 +29,7 @@ async def get_users(condition: user.GetUsers, db: Prisma = Depends(db.get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Users Not Found!')
 
     return users
+
 """
 Function handling getting the user with id
 """
@@ -97,7 +98,7 @@ async def verify_email(db: Prisma = Depends(db.get_db), user_id: str = Depends(a
 Function handling resetting the password
 """
 @router.put('/reset', status_code=status.HTTP_200_OK)
-async def reset_password(user: user.ResetPassword , db: Prisma = Depends(db.get_db)):
+async def reset_password(user: ResetPassword , db: Prisma = Depends(db.get_db)):
     # Query the user by email
     user = await db.user.find_unique(
         where={
@@ -116,7 +117,6 @@ async def reset_password(user: user.ResetPassword , db: Prisma = Depends(db.get_
             'password': hash.hash_password(user.password)
         }
     )
-
 
 """
 Function handling deleting the user
